@@ -17,6 +17,15 @@ public class LongOperationService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
+    public enum STATUS{
+        IDLE,
+        STARTING,
+        RUNNING,
+        CANCELLING
+    }
+
+    STATUS currentStatus =  STATUS.IDLE;
+
     public void onCreate() {
         super.onCreate();
         nm = (NotificationManager)  getSystemService(NOTIFICATION_SERVICE);
@@ -28,6 +37,8 @@ public class LongOperationService extends Service {
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
+    public STATUS getCurrentStatus() {
+        return currentStatus;
     }
 
     /**
