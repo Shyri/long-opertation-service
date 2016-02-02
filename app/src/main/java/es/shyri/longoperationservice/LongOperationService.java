@@ -11,11 +11,13 @@ import android.support.annotation.Nullable;
  */
 public class LongOperationService extends Service {
 
+    private final IBinder mBinder = new LocalBinder();
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
+    }
     }
 
     /**
