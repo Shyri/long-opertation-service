@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">LongOperationservice</string>
+    <string name="notification_title">LongOperationservice</string>
+    <string name="notification_message_starting">Initializing long operation</string>
+    <string name="notification_message_running">Running long operation</string>
 </resources>
