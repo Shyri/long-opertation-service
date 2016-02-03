@@ -1,4 +1,4 @@
-package es.shyri.longoperationservice;
+package es.shyri.longtaskservice;
 
 import org.junit.Test;
 

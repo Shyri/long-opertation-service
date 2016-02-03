@@ -1,4 +1,4 @@
-package es.shyri.longoperationservice;
+package es.shyri.longtaskservice;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,4 +1,4 @@
-package es.shyri.longoperationservice;
+package es.shyri.longtaskservice;
 
 import android.app.NotificationManager;
 import android.app.Service;
@@ -11,8 +11,9 @@ import android.support.v7.app.NotificationCompat;
 /**
  * Created by Shyri on 01/02/2016.
  */
-public class LongOperationService extends Service {
-    public static final int NOTIFICATION_ID = 1234;
+public class LongTaskService extends Service {
+    public static final int NOTIFICATION_ID_PROGRESS = 1234;
+    public static final int NOTIFICATION_ID_ENDED = 1235;
     private NotificationManager nm;
 
     private final IBinder mBinder = new LocalBinder();
@@ -21,7 +22,10 @@ public class LongOperationService extends Service {
         IDLE,
         STARTING,
         RUNNING,
-        CANCELLING
+        CANCELLING,
+        END_SUCCESSFULLY,
+        END_ERROR,
+        END_CANCELED
     }
 
     STATUS currentStatus =  STATUS.IDLE;
@@ -38,7 +42,7 @@ public class LongOperationService extends Service {
         return mBinder;
     }
 
-    public void performLongOperation() {
+    public void performLongTask() {
         currentStatus = STATUS.STARTING;
         updateStatus();
 
@@ -64,18 +68,18 @@ public class LongOperationService extends Service {
                 currentStatus = STATUS.RUNNING;
                 updateStatus();
 
-                //////////////////////// Start long operation
+                //////////////////////// Start long task
                 while(percentage < 100) {
                     i++;
-                    if(i == 30000000) {
+                    if(i == 40000000) {
                         percentage++;
                         updateProgress(percentage);
                         i = 0;
                     }
                 }
-                ////////////////////////
-
-
+                ///////////////////////
+                currentStatus = STATUS.END_SUCCESSFULLY;
+                updateStatus();
             }
         }).start();
     }
@@ -88,7 +92,7 @@ public class LongOperationService extends Service {
                         .setContentText(getString(R.string.notification_message_starting))
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setOngoing(true);
-                startForeground(NOTIFICATION_ID, notificationBuilder.build());
+                startForeground(NOTIFICATION_ID_PROGRESS, notificationBuilder.build());
                 break;
             }
             case RUNNING: {
@@ -98,7 +102,17 @@ public class LongOperationService extends Service {
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setOngoing(true)
                         .setContentInfo("0%");
-                startForeground(NOTIFICATION_ID, notificationBuilder.build());
+                startForeground(NOTIFICATION_ID_PROGRESS, notificationBuilder.build());
+                break;
+            }
+            case END_SUCCESSFULLY: {
+                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
+                notificationBuilder.setContentTitle(getString(R.string.notification_title))
+                        .setContentText(getString(R.string.notification_message_end_successfully))
+                        .setOngoing(false)
+                        .setSmallIcon(R.mipmap.ic_launcher);
+                nm.notify(NOTIFICATION_ID_ENDED, notificationBuilder.build());
+                stopForeground(true);
                 break;
             }
             default:
@@ -114,10 +128,10 @@ public class LongOperationService extends Service {
                 .setOngoing(true)
                 .setProgress(100, Integer.valueOf(progress), false)
                 .setContentInfo(progress + "%");
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
+        startForeground(NOTIFICATION_ID_PROGRESS, notificationBuilder.build());
     }
 
-    public void cancelLongOperation() {
+    public void cancelLongTask() {
 
     }
 
@@ -130,9 +144,9 @@ public class LongOperationService extends Service {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        public LongOperationService getService() {
+        public LongTaskService getService() {
             // Return this instance of LocalService so clients can call public methods
-            return LongOperationService.this;
+            return LongTaskService.this;
         }
     }
 }

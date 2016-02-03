@@ -1,4 +1,4 @@
-package es.shyri.longoperationservice;
+package es.shyri.longtaskservice;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,7 +16,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
-    LongOperationService mService;
+    LongTaskService mService;
     boolean mBound;
 
     @Bind(R.id.textViewMessage)
@@ -28,18 +28,18 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.progressBar)
     ProgressBar progressBar;
 
-    @Bind(R.id.buttonStartLongOperation)
-    Button buttonStartLongOperation;
+    @Bind(R.id.buttonStartLongTask)
+    Button buttonStartLongTask;
 
-    @Bind(R.id.buttonStopLongOperation)
-    Button buttonStopLongOperation;
+    @Bind(R.id.buttonStopLongTask)
+    Button buttonStopLongTask;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to the Service, cast the IBinder and get LocalService instance
-            LongOperationService.LocalBinder binder = (LongOperationService.LocalBinder) service;
+            LongTaskService.LocalBinder binder = (LongTaskService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
         }
@@ -55,16 +55,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bindService(new Intent(this, LongOperationService.class), mConnection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, LongTaskService.class), mConnection, Context.BIND_AUTO_CREATE);
         ButterKnife.bind(this);
 
-        buttonStartLongOperation.setOnClickListener(new View.OnClickListener() {
+        buttonStartLongTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LongOperationService.class);
+                Intent intent = new Intent(MainActivity.this, LongTaskService.class);
                 startService(intent);
                 if(mBound) {
-                    mService.performLongOperation();
+                    mService.performLongTask();
                 }
             }
         });
