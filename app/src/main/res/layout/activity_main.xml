@@ -38,7 +38,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start long opeartion"
+        android:text="@string/button_start_long_task"
         android:id="@+id/buttonStartLongTask"
         android:layout_gravity="center_horizontal" />
 

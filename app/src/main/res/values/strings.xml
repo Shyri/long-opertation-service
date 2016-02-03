@@ -4,4 +4,6 @@
     <string name="notification_message_starting">Initializing long task</string>
     <string name="notification_message_running">Running long task</string>
     <string name="notification_message_end_successfully">Long task performed succesfully</string>
+
+    <string name="button_start_long_task">Start long task</string>
 </resources>
