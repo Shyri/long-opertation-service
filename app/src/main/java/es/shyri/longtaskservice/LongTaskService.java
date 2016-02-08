@@ -11,29 +11,18 @@ import android.support.v7.app.NotificationCompat;
 /**
  * Created by Shyri on 01/02/2016.
  */
-public class LongTaskService extends Service {
+public class LongTaskService extends Service implements LongTaskRunnable.LontTaskInterface {
     public static final int NOTIFICATION_ID_PROGRESS = 1234;
     public static final int NOTIFICATION_ID_ENDED = 1235;
     private NotificationManager nm;
+    private LongTaskRunnable longTaskRunnable;
 
     private final IBinder mBinder = new LocalBinder();
-
-    public enum STATUS{
-        IDLE,
-        STARTING,
-        RUNNING,
-        CANCELLING,
-        END_SUCCESSFULLY,
-        END_ERROR,
-        END_CANCELED
-    }
-
-    STATUS currentStatus =  STATUS.IDLE;
 
     public void onCreate() {
         super.onCreate();
         nm = (NotificationManager)  getSystemService(NOTIFICATION_SERVICE);
-
+        longTaskRunnable = new LongTaskRunnable(this);
     }
 
     @Nullable
@@ -43,48 +32,23 @@ public class LongTaskService extends Service {
     }
 
     public void performLongTask() {
-        currentStatus = STATUS.STARTING;
-        updateStatus();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int i = 0;
-                int percentage = 0;
-
-                //////////////////////// Remain in Starting status for a while
-                while(percentage < 100) {
-                    i++;
-                    if(i == 20000000) {
-                        percentage++;
-                        i = 0;
-                    }
-                }
-                ////////////////////////
-
-                i = 0;
-                percentage = 0;
-
-                currentStatus = STATUS.RUNNING;
-                updateStatus();
-
-                //////////////////////// Start long task
-                while(percentage < 100) {
-                    i++;
-                    if(i == 40000000) {
-                        percentage++;
-                        updateProgress(percentage);
-                        i = 0;
-                    }
-                }
-                ///////////////////////
-                currentStatus = STATUS.END_SUCCESSFULLY;
-                updateStatus();
-            }
-        }).start();
+        new Thread(longTaskRunnable).start();
     }
 
-    private void updateStatus() {
+    public void cancelLongTask() {
+
+    }
+
+    public LongTaskRunnable.STATUS getCurrentStatus() {
+        return longTaskRunnable.getCurrentStatus();
+    }
+
+    public void setMessageHandler(Handler longTaskMessageHandler) {
+        this.longTaskMessageHandler = longTaskMessageHandler;
+    }
+
+    @Override
+    public void onStatusUpdate(LongTaskRunnable.STATUS currentStatus) {
         switch(currentStatus) {
             case STARTING: {
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
@@ -120,23 +84,16 @@ public class LongTaskService extends Service {
         }
     }
 
-    private void updateProgress(int progress) {
+    @Override
+    public void onProgressUpdate(int percentage) {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setContentTitle(getString(R.string.notification_title))
                 .setContentText(getString(R.string.notification_message_running))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOngoing(true)
-                .setProgress(100, Integer.valueOf(progress), false)
-                .setContentInfo(progress + "%");
+                .setProgress(100, percentage, false)
+                .setContentInfo(percentage + "%");
         startForeground(NOTIFICATION_ID_PROGRESS, notificationBuilder.build());
-    }
-
-    public void cancelLongTask() {
-
-    }
-
-    public STATUS getCurrentStatus() {
-        return currentStatus;
     }
 
     /**
