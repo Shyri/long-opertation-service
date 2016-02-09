@@ -16,6 +16,7 @@ public class LongTaskRunnable implements Runnable {
     }
 
     STATUS currentStatus =  STATUS.IDLE;
+    boolean isCancelled = false;
 
     public LongTaskRunnable(LontTaskInterface listener) {
         this.listener = listener;
@@ -23,13 +24,63 @@ public class LongTaskRunnable implements Runnable {
 
     @Override
     public void run() {
+        //////////////////////// Remain in Starting status for a while
+        doStartingStage();
+        ////////////////////////
+
+        //////////////////////// Start long task
+        doTaskStage();
+        ///////////////////////
+
+        currentStatus = STATUS.END_SUCCESSFULLY;
+        listener.onStatusUpdate(currentStatus);
+    }
+
+    private void doStartingStage() {
         currentStatus = STATUS.STARTING;
         listener.onStatusUpdate(currentStatus);
 
         int i = 0;
         int percentage = 0;
+        while(percentage < 100) {
+            i++;
+            if(i == 20000000) {
+                percentage++;
+                i = 0;
+                if(isCancelled){
+                    doCancellingStage();
+                    return;
+                }
+            }
+        }
+    }
 
-        //////////////////////// Remain in Starting status for a while
+    private void doTaskStage() {
+        currentStatus = STATUS.RUNNING;
+        listener.onStatusUpdate(currentStatus);
+
+        int i = 0;
+        int percentage = 0;
+        while(percentage < 100) {
+            i++;
+            if(i == 40000000) {
+                percentage++;
+                listener.onProgressUpdate(percentage);
+                i = 0;
+                if(isCancelled){
+                    doCancellingStage();
+                    return;
+                }
+            }
+        }
+    }
+
+    private void doCancellingStage() {
+        currentStatus = STATUS.CANCELLING;
+        listener.onStatusUpdate(currentStatus);
+
+        int i = 0;
+        int percentage = 0;
         while(percentage < 100) {
             i++;
             if(i == 20000000) {
@@ -37,31 +88,17 @@ public class LongTaskRunnable implements Runnable {
                 i = 0;
             }
         }
-        ////////////////////////
 
-        i = 0;
-        percentage = 0;
-
-        currentStatus = STATUS.RUNNING;
-        listener.onStatusUpdate(currentStatus);
-
-        //////////////////////// Start long task
-        while(percentage < 100) {
-            i++;
-            if(i == 40000000) {
-                percentage++;
-                listener.onProgressUpdate(percentage);
-                i = 0;
-            }
-        }
-        ///////////////////////
-
-        currentStatus = STATUS.END_SUCCESSFULLY;
+        currentStatus = STATUS.END_CANCELED;
         listener.onStatusUpdate(currentStatus);
     }
 
     public STATUS getCurrentStatus() {
         return currentStatus;
+    }
+
+    public void cancel() {
+        isCancelled = true;
     }
 
     public interface LontTaskInterface {
