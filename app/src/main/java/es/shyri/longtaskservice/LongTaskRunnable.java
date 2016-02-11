@@ -12,7 +12,7 @@ public class LongTaskRunnable implements Runnable {
         CANCELLING,
         END_SUCCESSFULLY,
         END_ERROR,
-        END_CANCELED
+        END_CANCELLED
     }
 
     STATUS currentStatus =  STATUS.IDLE;
@@ -31,9 +31,6 @@ public class LongTaskRunnable implements Runnable {
         //////////////////////// Start long task
         doTaskStage();
         ///////////////////////
-
-        currentStatus = STATUS.END_SUCCESSFULLY;
-        listener.onStatusUpdate(currentStatus);
     }
 
     private void doStartingStage() {
@@ -73,6 +70,10 @@ public class LongTaskRunnable implements Runnable {
                 }
             }
         }
+
+
+        currentStatus = STATUS.END_SUCCESSFULLY;
+        listener.onStatusUpdate(currentStatus);
     }
 
     private void doCancellingStage() {
@@ -89,7 +90,7 @@ public class LongTaskRunnable implements Runnable {
             }
         }
 
-        currentStatus = STATUS.END_CANCELED;
+        currentStatus = STATUS.END_CANCELLED;
         listener.onStatusUpdate(currentStatus);
     }
 
